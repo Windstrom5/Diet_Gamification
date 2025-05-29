@@ -101,4 +101,7 @@ dependencies {
     implementation(libs.google.firebase.firestore)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.glide.v4160)
+    ksp(libs.compiler.v4160)
+
 }

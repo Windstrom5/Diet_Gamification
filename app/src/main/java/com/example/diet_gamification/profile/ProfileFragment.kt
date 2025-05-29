@@ -35,6 +35,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.diet_gamification.firebase.AccountFirebaseRepository
 import com.example.diet_gamification.room.AccountItemEntity
 import com.example.diet_gamification.room.AppDatabase
@@ -449,6 +450,8 @@ class ProfileFragment : Fragment() {
 
         val emailEditText = dialogView.findViewById<EditText>(R.id.etEmail)
         val passwordEditText = dialogView.findViewById<EditText>(R.id.etPassword)
+        val captchaEditText = dialogView.findViewById<EditText>(R.id.etCaptcha)
+        val captchaImageView = dialogView.findViewById<ImageView>(R.id.ivCaptcha)
         val loginButton = dialogView.findViewById<Button>(R.id.btnLogin)
         val registerText = dialogView.findViewById<TextView>(R.id.tvRegister)
         val forgotPasswordText = dialogView.findViewById<TextView>(R.id.tvForgotPassword)
@@ -460,60 +463,77 @@ class ProfileFragment : Fragment() {
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
+        // Load initial CAPTCHA
+        val captchaUrl = "http://your-laravel-domain.com/captcha"
+        Glide.with(context)
+            .load(captchaUrl)
+            .into(captchaImageView)
+
+        // Refresh CAPTCHA on click
+        captchaImageView.setOnClickListener {
+            Glide.with(context)
+                .load("$captchaUrl?reload=${System.currentTimeMillis()}")
+                .into(captchaImageView)
+        }
+
         loginButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
             val password = passwordEditText.text.toString().trim()
+            val captcha = captchaEditText.text.toString().trim()
 
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(context, "Please fill in both fields", Toast.LENGTH_SHORT).show()
-            } else {
-                val retrofit = Retrofit.Builder()
-                    .baseUrl("http://your-laravel-domain.com/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
+            if (email.isEmpty() || password.isEmpty() || captcha.isEmpty()) {
+                Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-                val api = retrofit.create(ApiService::class.java)
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        // Prepare login request body
-                        val loginRequest = mapOf(
-                            "email" to email,
-                            "password" to password
-                        )
-                        val response = api.login(loginRequest)
+            val retrofit = Retrofit.Builder()
+                .baseUrl("http://your-laravel-domain.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
 
-                        withContext(Dispatchers.Main) {
-                            if (response.isSuccessful) {
-                                val body = response.body()
-                                // Assuming your backend returns user data under "account" key
-                                val accountData = body?.get("account") as? Map<String, Any>
+            val api = retrofit.create(ApiService::class.java)
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val loginRequest = mapOf(
+                        "email" to email,
+                        "password" to password,
+                        "captcha" to captcha
+                    )
+                    val response = api.login(loginRequest)
 
-                                if (accountData != null) {
-                                    // Convert Map<String, Any> to AccountModel
-                                    val account = mapToAccountModel(accountData)
+                    withContext(Dispatchers.Main) {
+                        if (response.isSuccessful) {
+                            val body = response.body()
+                            val accountData = body?.get("account") as? Map<String, Any>
 
-                                    Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                            if (accountData != null) {
+                                val account = mapToAccountModel(accountData)
 
-                                    val mainActivity = context as? MainActivity
-                                    mainActivity?.currentAccountModel = account
-                                    mainActivity?.updateUsername()
-                                    mainActivity?.openFragment(ProfileFragment())
+                                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
 
-                                    dialog.dismiss()
-                                } else {
-                                    Toast.makeText(context, "Login failed: Invalid account data", Toast.LENGTH_SHORT).show()
-                                }
+                                val mainActivity = context as? MainActivity
+                                mainActivity?.currentAccountModel = account
+                                mainActivity?.updateUsername()
+                                mainActivity?.openFragment(ProfileFragment())
+
+                                dialog.dismiss()
                             } else {
-                                // Parse Laravel validation or error message
-                                val errorJson = response.errorBody()?.string()
-                                val errorMessage = parseLaravelError(errorJson)
-                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Login failed: Invalid account data", Toast.LENGTH_SHORT).show()
                             }
+                        } else {
+                            val errorJson = response.errorBody()?.string()
+                            val errorMessage = parseLaravelError(errorJson)
+                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+
+                            // Refresh CAPTCHA on failure
+                            Glide.with(context)
+                                .load("$captchaUrl?reload=${System.currentTimeMillis()}")
+                                .into(captchaImageView)
                         }
-                    } catch (e: Exception) {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(context, "Login error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
-                        }
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Login error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -530,6 +550,7 @@ class ProfileFragment : Fragment() {
 
         dialog.show()
     }
+
 
     private fun mapToAccountModel(data: Map<String, Any>): AccountModel {
         return AccountModel(
