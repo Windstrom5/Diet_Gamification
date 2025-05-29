@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- Week Selector -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:endIconMode="dropdown_menu">
+        <AutoCompleteTextView
+            android:id="@+id/filterWeekSelector"
+            android:layout_width="match_parent"
+            android:paddingStart="16dp"
+            android:layout_height="match_parent"
+            android:hint="Select Week"
+            android:inputType="none"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Data Type (Calories or EXP) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:endIconMode="dropdown_menu"
+        android:layout_marginTop="16dp">
+        <AutoCompleteTextView
+            android:id="@+id/filterDataType"
+            android:layout_width="match_parent"
+            android:paddingStart="16dp"
+            android:layout_height="match_parent"
+            android:hint="Data Type (Calories or EXP)"
+            android:inputType="none"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Chart Type -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:endIconMode="dropdown_menu"
+        android:layout_marginTop="16dp">
+        <AutoCompleteTextView
+            android:id="@+id/filterChartType"
+            android:layout_width="match_parent"
+            android:paddingStart="16dp"
+            android:layout_height="match_parent"
+            android:hint="Chart Type (Bar or Line)"
+            android:inputType="none"/>
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>
