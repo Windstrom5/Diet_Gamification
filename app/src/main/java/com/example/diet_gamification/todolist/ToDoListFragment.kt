@@ -33,6 +33,7 @@ import com.example.diet_gamification.model.AccountModel
 import com.example.diet_gamification.room.XpHistoryDao
 import com.example.diet_gamification.room.XpHistoryEntity
 import com.example.diet_gamification.shop.ShopRepository.getCalorieBuff
+import com.example.diet_gamification.utils.ApiService
 import com.example.diet_gamification.utils.FoodClassifier
 import com.example.diet_gamification.utils.NotificationUtils
 import com.example.diet_gamification.utils.SharedPrefsManager
@@ -40,6 +41,8 @@ import com.example.diet_gamifikasi.MainActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.time.LocalDate
 
 class ToDoListFragment : Fragment() {
@@ -296,6 +299,7 @@ class ToDoListFragment : Fragment() {
         if (currentCalories >= targetCalories) {
             val xpEarned = calculateXPForCalories(currentCalories)
             updateXPInRoomDb(xpEarned)
+            updateXPToLaravel(xpEarned)
         }
     }
     private fun updateXPInRoomDb(xp: Int) {
@@ -318,7 +322,40 @@ class ToDoListFragment : Fragment() {
             Toast.makeText(requireContext(), "XP Updated! You earned $xp XP for meeting your calorie target!", Toast.LENGTH_SHORT).show()
         }
     }
+    private fun updateXPToLaravel(xp: Int) {
+        val account = accountModel ?: return
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://127.0.0.1:8000") // Replace with actual base URL
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
+        val api = retrofit.create(ApiService::class.java)
+
+        val request = mapOf(
+            "account_id" to account.id,
+            "xpGained" to xp,
+            "category" to "Calories",
+            "date" to LocalDate.now().toString()
+        )
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val response = api.createXpEntry(request)
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        Toast.makeText(requireContext(), "XP saved to server!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to save XP", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
     private fun showDatePickerDialog() {
         val now = Calendar.getInstance()
         val startOfWeek = now.clone() as Calendar

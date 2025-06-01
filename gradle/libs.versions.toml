@@ -1,5 +1,6 @@
 [versions]
 agp = "8.10.0"
+androidGifDrawable = "1.2.29"
 androidxNavigationFragmentKtx = "2.8.9"
 androidxNavigationUiKtx = "2.8.9"
 calligraphy = "2.3.0"
@@ -12,6 +13,7 @@ compiler = "5.5.0"
 compilerVersion = "4.16.0"
 converterGson = "2.9.0"
 drawerbehavior = "1.0.13"
+easyandroidloading = "1.0.1"
 firebaseBom = "33.13.0"
 glide = "5.0.0"
 glideVersion = "4.16.0"
@@ -26,6 +28,7 @@ espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
 composeBom = "2024.04.01"
+loadingoverlay = "1.0.0"
 material = "1.12.0"
 appcompat = "1.7.0"
 constraintlayout = "2.2.0"
@@ -55,6 +58,7 @@ view = "2.4.0"
 workRuntimeKtx = "2.10.1"
 
 [libraries]
+android-gif-drawable = { module = "pl.droidsonroids.gif:android-gif-drawable", version.ref = "androidGifDrawable" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
 androidx-camera-camera2-v130 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2Version" }
 androidx-camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "cameraCamera2" }
@@ -81,6 +85,7 @@ compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compi
 compiler-v4160 = { module = "com.github.bumptech.glide:compiler", version.ref = "compilerVersion" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 drawerbehavior = { module = "com.shiburagi.drawerbehavior:drawerbehavior", version.ref = "drawerbehavior" }
+easyandroidloading = { module = "com.github.Gkemon:EasyAndroidLoading", version.ref = "easyandroidloading" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
@@ -102,6 +107,7 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+loadingoverlay = { module = "com.mohamedabulgasem:loadingoverlay", version.ref = "loadingoverlay" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }

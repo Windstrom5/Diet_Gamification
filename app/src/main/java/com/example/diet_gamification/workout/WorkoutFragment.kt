@@ -15,10 +15,14 @@ import com.example.diet_gamification.room.AppDatabase
 import com.example.diet_gamification.room.XpHistoryDao
 import com.example.diet_gamification.room.XpHistoryEntity
 import com.example.diet_gamification.shop.ShopRepository
+import com.example.diet_gamification.utils.ApiService
 import com.example.diet_gamification.utils.XpRepository
 import com.example.diet_gamifikasi.MainActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
@@ -176,6 +180,7 @@ class WorkoutFragment : Fragment() {
         mainActivity.currentAccountModel = accountModel
         mainActivity.updateUsername()
         updateXPInRoomDb(finalXp)
+        updateXPToLaravel(finalXp)
         Toast.makeText(requireContext(), "Workout OK! +$finalXp XP earned!", Toast.LENGTH_LONG).show()
     }
     private fun updateXPInRoomDb(xp: Int) {
@@ -198,6 +203,41 @@ class WorkoutFragment : Fragment() {
             Toast.makeText(requireContext(), "XP Updated! You earned $xp XP for meeting your calorie target!", Toast.LENGTH_SHORT).show()
         }
     }
+    private fun updateXPToLaravel(xp: Int) {
+        val account = accountModel ?: return
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://127.0.0.1:8000") // Replace with actual base URL
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val api = retrofit.create(ApiService::class.java)
+
+        val request = mapOf(
+            "account_id" to account.id,
+            "xpGained" to xp,
+            "category" to "Workout",
+            "date" to LocalDate.now().toString()
+        )
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val response = api.createXpEntry(request)
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        Toast.makeText(requireContext(), "XP saved to server!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to save XP", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     private fun loadWorkoutCalories() {
         val map = mutableMapOf<String, Double>()
         val inputStream = requireContext().assets.open("exercise_dataset.csv")

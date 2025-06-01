@@ -103,5 +103,5 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.glide.v4160)
     ksp(libs.compiler.v4160)
-
+    implementation (libs.android.gif.drawable)
 }

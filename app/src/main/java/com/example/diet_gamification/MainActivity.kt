@@ -1,7 +1,9 @@
 package com.example.diet_gamifikasi
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.app.AlarmManager
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Typeface
@@ -37,12 +39,15 @@ import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import android.content.pm.PackageManager
 import android.util.Log
+import android.view.LayoutInflater
+import androidx.core.content.ContentProviderCompat.requireContext
 
 class MainActivity : AppCompatActivity() {
     private val userViewModel: UserViewModel by viewModels()
     var currentAccountModel: AccountModel? = null
     private lateinit var bottomNavigation: BottomNavigationView
-
+    private var loadingDialog: AlertDialog? = null
+    private var loadingAnimator: ValueAnimator? = null
     // Create ActivityResultLauncher to request exact alarm permission
     private val requestExactAlarmPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -157,7 +162,54 @@ class MainActivity : AppCompatActivity() {
             setDailyReminders()
         }
     }
-    fun     updateUsername() {
+    fun showLoadingDialog() {
+        if (loadingDialog == null) {
+            val dialogView = LayoutInflater.from(this@MainActivity).inflate(R.layout.dialog_loading, null)
+            val loadingText = dialogView.findViewById<TextView>(R.id.loadingText)
+
+            loadingDialog = AlertDialog.Builder(this@MainActivity)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create()
+
+            // Start wave animation on loading text
+            loadingAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = 1200
+                repeatCount = ValueAnimator.INFINITE
+                repeatMode = ValueAnimator.RESTART
+
+                addUpdateListener { animation ->
+                    val progress = animation.animatedFraction
+                    val alpha = 0.3f + 0.7f * kotlin.math.abs(kotlin.math.sin(progress * Math.PI * 2)).toFloat()
+                    loadingText.alpha = alpha
+                }
+                start()
+            }
+        }
+        loadingDialog?.show()
+    }
+    fun animateLoadingText(textView: TextView) {
+        val loadingText = textView.text.toString()
+        val animator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 1200
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.RESTART
+
+            addUpdateListener { animation ->
+                val progress = animation.animatedFraction
+                // Calculate alpha based on progress to create wave effect
+                val alpha = 0.3f + 0.7f * kotlin.math.abs(kotlin.math.sin(progress * Math.PI * 2)).toFloat()
+                textView.alpha = alpha
+            }
+        }
+        animator.start()
+    }
+
+    fun hideLoadingDialog() {
+        loadingAnimator?.cancel()
+        loadingDialog?.dismiss()
+    }
+    fun updateUsername() {
         findViewById<TextView>(R.id.tvUsername).text = currentAccountModel?.name ?: "Guest"
         findViewById<TextView>(R.id.tvExp).text = "EXP: ${currentAccountModel?.Exp ?: 0}"
         val rootView = findViewById<ViewGroup>(android.R.id.content).getChildAt(0)

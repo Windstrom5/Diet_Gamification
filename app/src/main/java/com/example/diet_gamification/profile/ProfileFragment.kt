@@ -33,6 +33,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -187,7 +188,12 @@ class ProfileFragment : Fragment() {
                     .setPositiveButton("OK", null)
                     .show()
             } else {
-                // Enough XP → ask for confirmation
+                val retrofit = Retrofit.Builder()
+                    .baseUrl("http://127.0.0.1:8000") // Replace with actual base URL
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+
+                val api = retrofit.create(ApiService::class.java)
                 AlertDialog.Builder(requireContext())
                     .setTitle("Confirm Purchase")
                     .setMessage("Spend $price EXP to buy “${item.nama}”?")
@@ -201,6 +207,37 @@ class ProfileFragment : Fragment() {
                             "$currentInventory,$itemId"
                         }
                         accountModel?.inventory = updatedInventory
+                        val newXp = userXp - price
+                        val newInventory = if ((accountModel?.inventory ?: "").isBlank()) {
+                            item.id
+                        } else {
+                            "${accountModel?.inventory},${item.id}"
+                        }
+
+                        val updateRequest = mapOf(
+                            "Exp" to newXp,
+                            "inventory" to newInventory
+                        )
+
+                        val accountId = accountModel?.id ?: return@setPositiveButton
+
+                        lifecycleScope.launch {
+                            val response = api.updateAccount(accountId, updateRequest)
+                            if (response.isSuccessful) {
+                                val updated = response.body()
+                                accountModel?.Exp = (updated?.get("Exp") as? Double)?.toInt() ?: newXp
+                                accountModel?.inventory = updated?.get("inventory") as? String ?: newInventory
+
+                                val mainActivity = activity as? MainActivity
+                                mainActivity?.currentAccountModel = accountModel
+                                mainActivity?.updateUsername()
+
+                                openFragment(ProfileFragment())
+                                dialog.dismiss()
+                            } else {
+                                Toast.makeText(requireContext(), "Failed to update account", Toast.LENGTH_SHORT).show()
+                            }
+                        }
 
                         val mainActivity = activity as? MainActivity
                         mainActivity?.currentAccountModel = accountModel
@@ -375,7 +412,7 @@ class ProfileFragment : Fragment() {
 
                 // Retrofit setup
                 val retrofit = Retrofit.Builder()
-                    .baseUrl("http://your-laravel-domain.com/")
+                    .baseUrl("http://127.0.0.1:8000")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
 
@@ -464,7 +501,7 @@ class ProfileFragment : Fragment() {
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         // Load initial CAPTCHA
-        val captchaUrl = "http://your-laravel-domain.com/captcha"
+        val captchaUrl = "http://127.0.0.1:8000captcha"
         Glide.with(context)
             .load(captchaUrl)
             .into(captchaImageView)
@@ -487,7 +524,7 @@ class ProfileFragment : Fragment() {
             }
 
             val retrofit = Retrofit.Builder()
-                .baseUrl("http://your-laravel-domain.com/")
+                .baseUrl("http://127.0.0.1:8000")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
 
