@@ -74,6 +74,7 @@ class ProfileFragment : Fragment() {
     private lateinit var username: TextView
     private lateinit var weightuser: TextView
     private lateinit var heightuser: TextView
+    val mainActivity = context as? MainActivity
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -189,7 +190,7 @@ class ProfileFragment : Fragment() {
                     .show()
             } else {
                 val retrofit = Retrofit.Builder()
-                    .baseUrl("http://127.0.0.1:8000") // Replace with actual base URL
+                    .baseUrl("https://selected-jaguar-presently.ngrok-free.app") // Replace with actual base URL
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
 
@@ -231,7 +232,7 @@ class ProfileFragment : Fragment() {
                                 val mainActivity = activity as? MainActivity
                                 mainActivity?.currentAccountModel = accountModel
                                 mainActivity?.updateUsername()
-
+                                mainActivity?.hideLoadingDialog()
                                 openFragment(ProfileFragment())
                                 dialog.dismiss()
                             } else {
@@ -412,7 +413,7 @@ class ProfileFragment : Fragment() {
 
                 // Retrofit setup
                 val retrofit = Retrofit.Builder()
-                    .baseUrl("http://127.0.0.1:8000")
+                    .baseUrl("https://selected-jaguar-presently.ngrok-free.app")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
 
@@ -440,6 +441,7 @@ class ProfileFragment : Fragment() {
                             } else {
                                 // response.errorBody() contains Laravel validation errors in JSON
                                 val errorJson = response.errorBody()?.string()
+                                Log.e("RegisterError", "Raw error response: $errorJson")  // <-- log raw error
                                 if (errorJson != null) {
                                     try {
                                         val jsonObj = JSONObject(errorJson)
@@ -487,8 +489,6 @@ class ProfileFragment : Fragment() {
 
         val emailEditText = dialogView.findViewById<EditText>(R.id.etEmail)
         val passwordEditText = dialogView.findViewById<EditText>(R.id.etPassword)
-        val captchaEditText = dialogView.findViewById<EditText>(R.id.etCaptcha)
-        val captchaImageView = dialogView.findViewById<ImageView>(R.id.ivCaptcha)
         val loginButton = dialogView.findViewById<Button>(R.id.btnLogin)
         val registerText = dialogView.findViewById<TextView>(R.id.tvRegister)
         val forgotPasswordText = dialogView.findViewById<TextView>(R.id.tvForgotPassword)
@@ -500,41 +500,29 @@ class ProfileFragment : Fragment() {
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        // Load initial CAPTCHA
-        val captchaUrl = "http://127.0.0.1:8000captcha"
-        Glide.with(context)
-            .load(captchaUrl)
-            .into(captchaImageView)
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://selected-jaguar-presently.ngrok-free.app")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
-        // Refresh CAPTCHA on click
-        captchaImageView.setOnClickListener {
-            Glide.with(context)
-                .load("$captchaUrl?reload=${System.currentTimeMillis()}")
-                .into(captchaImageView)
-        }
+        val api = retrofit.create(ApiService::class.java)
 
         loginButton.setOnClickListener {
+            mainActivity?.showLoadingDialog()
             val email = emailEditText.text.toString().trim()
             val password = passwordEditText.text.toString().trim()
-            val captcha = captchaEditText.text.toString().trim()
 
-            if (email.isEmpty() || password.isEmpty() || captcha.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                mainActivity?.hideLoadingDialog()
                 return@setOnClickListener
             }
 
-            val retrofit = Retrofit.Builder()
-                .baseUrl("http://127.0.0.1:8000")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-
-            val api = retrofit.create(ApiService::class.java)
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val loginRequest = mapOf(
                         "email" to email,
-                        "password" to password,
-                        "captcha" to captcha
+                        "password" to password
                     )
                     val response = api.login(loginRequest)
 
@@ -542,35 +530,31 @@ class ProfileFragment : Fragment() {
                         if (response.isSuccessful) {
                             val body = response.body()
                             val accountData = body?.get("account") as? Map<String, Any>
-
                             if (accountData != null) {
                                 val account = mapToAccountModel(accountData)
-
                                 Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
 
-                                val mainActivity = context as? MainActivity
+
                                 mainActivity?.currentAccountModel = account
                                 mainActivity?.updateUsername()
                                 mainActivity?.openFragment(ProfileFragment())
-
+                                mainActivity?.hideLoadingDialog()
                                 dialog.dismiss()
                             } else {
                                 Toast.makeText(context, "Login failed: Invalid account data", Toast.LENGTH_SHORT).show()
+                                mainActivity?.hideLoadingDialog()
                             }
                         } else {
                             val errorJson = response.errorBody()?.string()
                             val errorMessage = parseLaravelError(errorJson)
                             Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-
-                            // Refresh CAPTCHA on failure
-                            Glide.with(context)
-                                .load("$captchaUrl?reload=${System.currentTimeMillis()}")
-                                .into(captchaImageView)
+                            mainActivity?.hideLoadingDialog()
                         }
                     }
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, "Login error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                        mainActivity?.hideLoadingDialog()
                     }
                 }
             }
@@ -587,7 +571,6 @@ class ProfileFragment : Fragment() {
 
         dialog.show()
     }
-
 
     private fun mapToAccountModel(data: Map<String, Any>): AccountModel {
         return AccountModel(

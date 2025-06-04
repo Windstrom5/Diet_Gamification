@@ -32,7 +32,8 @@
 
         @GET("/api/accounts/verification")
         suspend fun verifyAccount(@Query("user") userJson: String): Response<String>
-
+        @GET("/api/captcha")
+        suspend fun getCaptcha(): Response<Map<String, String>>
 
         // ----------- CALORIES -----------
         @GET("/api/calories")

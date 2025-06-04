@@ -325,7 +325,7 @@ class ToDoListFragment : Fragment() {
     private fun updateXPToLaravel(xp: Int) {
         val account = accountModel ?: return
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://127.0.0.1:8000") // Replace with actual base URL
+            .baseUrl("https://selected-jaguar-presently.ngrok-free.app") // Replace with actual base URL
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
