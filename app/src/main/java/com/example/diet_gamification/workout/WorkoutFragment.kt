@@ -129,10 +129,10 @@ class WorkoutFragment : Fragment() {
         val weightFactor = 1 + (account.berat - 50) / 100.0
         val intensityFactor = workoutCaloriesMap[selectedActivity] ?: 0.0
         val durationHours = totalSeconds / 3600.0
-        val baseXP = 20
-        val calculatedXP = (baseXP + (durationHours * intensityFactor * weightFactor * heightFactor * 10)).toInt()
+        val basexp = 20
+        val calculatedXP = (basexp + (durationHours * intensityFactor * weightFactor * heightFactor * 10)).toInt()
 
-        account.Exp += calculatedXP
+        account.exp += calculatedXP
 
         val mainActivity = activity as? MainActivity
         mainActivity?.currentAccountModel = account
@@ -161,7 +161,7 @@ class WorkoutFragment : Fragment() {
             return
         }
         // 1) Base XP from calories
-        val baseXp = (caloriesBurned / 10).toInt()
+        val basexp = (caloriesBurned / 10).toInt()
         // 2) Duration bonus
         val durationXp = (totalSeconds / 60.0 / 5).toInt()
 
@@ -172,18 +172,18 @@ class WorkoutFragment : Fragment() {
         val buff = ShopRepository.getWorkoutBuff(accountModel.inventory, weight, height)
 
         // 4) Compute total
-        val rawTotal = baseXp + durationXp + buff.additiveXp
+        val rawTotal = basexp + durationXp + buff.additivexp
         val finalXp = (rawTotal * buff.multiplier).toInt()
 
         // 5) Apply to account
-        accountModel.Exp += finalXp
+        accountModel.exp += finalXp
         mainActivity.currentAccountModel = accountModel
         mainActivity.updateUsername()
-        updateXPInRoomDb(finalXp)
-        updateXPToLaravel(finalXp)
+        updatexpInRoomDb(finalXp)
+        updatexpToLaravel(finalXp)
         Toast.makeText(requireContext(), "Workout OK! +$finalXp XP earned!", Toast.LENGTH_LONG).show()
     }
-    private fun updateXPInRoomDb(xp: Int) {
+    private fun updatexpInRoomDb(xp: Int) {
         // Launch a coroutine in the lifecycleScope of the Fragment or Activity
         lifecycleScope.launch {
             val today = LocalDate.now().toString()
@@ -203,7 +203,7 @@ class WorkoutFragment : Fragment() {
             Toast.makeText(requireContext(), "XP Updated! You earned $xp XP for meeting your calorie target!", Toast.LENGTH_SHORT).show()
         }
     }
-    private fun updateXPToLaravel(xp: Int) {
+    private fun updatexpToLaravel(xp: Int) {
         val account = accountModel ?: return
         val retrofit = Retrofit.Builder()
             .baseUrl("https://selected-jaguar-presently.ngrok-free.app") // Replace with actual base URL
@@ -221,7 +221,7 @@ class WorkoutFragment : Fragment() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val response = api.createXpEntry(request)
+                val response = api.createxpEntry(request)
 
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {

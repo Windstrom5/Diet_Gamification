@@ -32,12 +32,12 @@
         app:layout_constraintEnd_toStartOf="@+id/btnFilter"
         app:layout_constraintHorizontal_bias="0" />
 
-    <!-- EXP Summary -->
+    <!-- exp Summary -->
     <TextView
         android:id="@+id/expSummary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Total EXP Gained This Week: 0"
+        android:text="Total exp Gained This Week: 0"
         android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/reportTitle"
         app:layout_constraintStart_toStartOf="parent"

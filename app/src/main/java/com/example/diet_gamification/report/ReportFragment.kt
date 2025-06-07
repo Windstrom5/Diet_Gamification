@@ -216,7 +216,7 @@ class ReportFragment : Fragment() {
 
             val avgCalories = if (caloriesPerDay.isNotEmpty()) totalCalories / caloriesPerDay.size else 0
 
-            expSummary.text = "Total Exp Gained This Week: $totalXp"
+            expSummary.text = "Total exp Gained This Week: $totalXp"
             caloriesSummary.text = "Average Calories This Week: $avgCalories kcal"
 
             setupBarChart(caloriesPerDay)

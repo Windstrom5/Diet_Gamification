@@ -13,7 +13,7 @@
 <!--        android:layout_width="0dp"-->
 <!--        android:layout_height="wrap_content"-->
 <!--        android:background="?attr/colorPrimary"-->
-<!--        app:title="EXP: 120 | Warrior | John Doe"-->
+<!--        app:title="exp: 120 | Warrior | John Doe"-->
 <!--        app:titleTextColor="@android:color/white"-->
 <!--        app:layout_constraintTop_toTopOf="parent"-->
 <!--        app:layout_constraintStart_toStartOf="parent"-->

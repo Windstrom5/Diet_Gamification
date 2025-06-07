@@ -167,7 +167,7 @@ class ToDoListFragment : Fragment() {
 //        }
     }
 
-    private fun calculateXPForCalories(calories: Int): Int {
+    private fun calculatexpForCalories(calories: Int): Int {
         // Calculate percentage of calories consumed
         val mainActivity = activity as? MainActivity
         val accountModel = mainActivity?.currentAccountModel
@@ -194,10 +194,10 @@ class ToDoListFragment : Fragment() {
 
         // Apply any available buffs from the inventory
         xpMultiplier *= calorieBuff.multiplier
-        val additiveXp = calorieBuff.additiveXp
+        val additivexp = calorieBuff.additivexp
 
         // Calculate XP based on the multiplier, additive XP, and calories consumed
-        val xpEarned = (calories * xpPerCalorieBase * xpMultiplier).toInt() + additiveXp
+        val xpEarned = (calories * xpPerCalorieBase * xpMultiplier).toInt() + additivexp
 
         return xpEarned
     }
@@ -297,12 +297,12 @@ class ToDoListFragment : Fragment() {
 
         // Automatically update Room DB when target is met
         if (currentCalories >= targetCalories) {
-            val xpEarned = calculateXPForCalories(currentCalories)
-            updateXPInRoomDb(xpEarned)
-            updateXPToLaravel(xpEarned)
+            val xpEarned = calculatexpForCalories(currentCalories)
+            updatexpInRoomDb(xpEarned)
+            updatexpToLaravel(xpEarned)
         }
     }
-    private fun updateXPInRoomDb(xp: Int) {
+    private fun updatexpInRoomDb(xp: Int) {
         // Launch a coroutine in the lifecycleScope of the Fragment or Activity
         lifecycleScope.launch {
             val today = LocalDate.now().toString()
@@ -322,7 +322,7 @@ class ToDoListFragment : Fragment() {
             Toast.makeText(requireContext(), "XP Updated! You earned $xp XP for meeting your calorie target!", Toast.LENGTH_SHORT).show()
         }
     }
-    private fun updateXPToLaravel(xp: Int) {
+    private fun updatexpToLaravel(xp: Int) {
         val account = accountModel ?: return
         val retrofit = Retrofit.Builder()
             .baseUrl("https://selected-jaguar-presently.ngrok-free.app") // Replace with actual base URL
@@ -340,7 +340,7 @@ class ToDoListFragment : Fragment() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val response = api.createXpEntry(request)
+                val response = api.createxpEntry(request)
 
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {

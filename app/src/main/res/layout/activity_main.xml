@@ -7,7 +7,7 @@
     android:background="@drawable/bg"
     tools:context="com.example.diet_gamifikasi.MainActivity">
 
-    <!-- Top bar displaying username and EXP -->
+    <!-- Top bar displaying username and exp -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
@@ -29,10 +29,10 @@
             android:layout_weight="1" />
 
         <TextView
-            android:id="@+id/tvExp"
+            android:id="@+id/tvexp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="EXP: 0"
+            android:text="exp: 0"
             android:textSize="18sp"
             android:textColor="@android:color/white" />
     </LinearLayout>

@@ -85,7 +85,7 @@ class ProfileFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         cardView = binding.Cardview
         edit = binding.edit
-        xp = binding.tvExp
+        xp = binding.tvexp
         name = binding.Name
         logout = binding.logout
         cvshop = binding.Cardviewshop
@@ -179,13 +179,13 @@ class ProfileFragment : Fragment() {
             // Parse price
             val price = item.price.toIntOrNull() ?: 0
             // Read user XP from your accountModel
-            val userXp = accountModel?.Exp ?: 0
+            val userXp = accountModel?.exp ?: 0
 
             if (userXp < price) {
                 // Not enough XP → show a warning
                 AlertDialog.Builder(requireContext())
-                    .setTitle("Not enough EXP")
-                    .setMessage("You need $price EXP to buy “${item.nama}”, but you only have $userXp EXP.")
+                    .setTitle("Not enough exp")
+                    .setMessage("You need $price exp to buy “${item.nama}”, but you only have $userXp exp.")
                     .setPositiveButton("OK", null)
                     .show()
             } else {
@@ -197,9 +197,9 @@ class ProfileFragment : Fragment() {
                 val api = retrofit.create(ApiService::class.java)
                 AlertDialog.Builder(requireContext())
                     .setTitle("Confirm Purchase")
-                    .setMessage("Spend $price EXP to buy “${item.nama}”?")
+                    .setMessage("Spend $price exp to buy “${item.nama}”?")
                     .setPositiveButton("Buy") { _, _ ->
-                        accountModel?.Exp = userXp - price
+                        accountModel?.exp = userXp - price
                         val currentInventory = accountModel?.inventory ?: ""
                         val itemId = item.id
                         val updatedInventory = if (currentInventory.isBlank()) {
@@ -216,7 +216,7 @@ class ProfileFragment : Fragment() {
                         }
 
                         val updateRequest = mapOf(
-                            "Exp" to newXp,
+                            "exp" to newXp,
                             "inventory" to newInventory
                         )
 
@@ -226,7 +226,7 @@ class ProfileFragment : Fragment() {
                             val response = api.updateAccount(accountId, updateRequest)
                             if (response.isSuccessful) {
                                 val updated = response.body()
-                                accountModel?.Exp = (updated?.get("Exp") as? Double)?.toInt() ?: newXp
+                                accountModel?.exp = (updated?.get("exp") as? Double)?.toInt() ?: newXp
                                 accountModel?.inventory = updated?.get("inventory") as? String ?: newInventory
 
                                 val mainActivity = activity as? MainActivity
@@ -265,8 +265,8 @@ class ProfileFragment : Fragment() {
     }
 
     // Somewhere in your Fragment/Activity, update the on‑screen XP counter:
-    private fun updateXpDisplay(newXp: Int) {
-        accountModel?.Exp = newXp
+    private fun updatexpDisplay(newXp: Int) {
+        accountModel?.exp = newXp
     }
     private fun showSettingDialog(context: Context, accountModel: AccountModel?) {
         val inflater = LayoutInflater.from(context)
@@ -277,18 +277,18 @@ class ProfileFragment : Fragment() {
         val etHeight = view.findViewById<TextInputEditText>(R.id.etHeight)
         val etFont = view.findViewById<AutoCompleteTextView>(R.id.etFont)
         val etTitle = view.findViewById<AutoCompleteTextView>(R.id.etTitle)
-        val etGender = view.findViewById<AutoCompleteTextView>(R.id.etGender)
+        val etgender = view.findViewById<AutoCompleteTextView>(R.id.etgender)
         val profile = view.findViewById<CircleImageView>(R.id.circleImageView)
         // Prefill existing data
         val genderOptions = listOf("Male", "Female")
         val genderAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, genderOptions)
-        etGender.setAdapter(genderAdapter)
-        etGender.setText(accountModel?.Gender, false)
+        etgender.setAdapter(genderAdapter)
+        etgender.setText(accountModel?.gender, false)
         etName.setText(accountModel?.name)
         etWeight.setText(accountModel?.berat?.toString())
         etHeight.setText(accountModel?.tinggi?.toString())
 //        etFont.setText(accountModel?.setting) // if storing font in setting
-//        etTitle.setText(accountModel?.se) // if using Gender as a title input here
+//        etTitle.setText(accountModel?.se) // if using gender as a title input here
         val unlocked = ShopRepository.getUnlockedItems(accountModel?.inventory)
 
 // Filter fonts from unlocked inventory
@@ -309,7 +309,7 @@ class ProfileFragment : Fragment() {
         val titleAdapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, unlockedTitles)
         etTitle.setAdapter(titleAdapter)
         val selectedFont = ShopRepository.shopItems.find { it.id == accountModel?.setting && it.id.startsWith("FT-") }?.nama
-        val selectedTitle = ShopRepository.shopItems.find { it.id == accountModel?.Gender && it.id.startsWith("TL-") }?.nama
+        val selectedTitle = ShopRepository.shopItems.find { it.id == accountModel?.gender && it.id.startsWith("TL-") }?.nama
 
         etFont.setText(selectedFont ?: "", false)
         etTitle.setText(selectedTitle ?: "", false)
@@ -347,7 +347,7 @@ class ProfileFragment : Fragment() {
                     name = etName.text.toString()
                     berat = etWeight.text.toString().toIntOrNull() ?: berat
                     tinggi = etHeight.text.toString().toIntOrNull() ?: tinggi
-                    Gender = etGender.text.toString()
+                    gender = etgender.text.toString()
                     setting = newSetting
                 }
 
@@ -376,7 +376,7 @@ class ProfileFragment : Fragment() {
         val passwordEditText = dialogView.findViewById<EditText>(R.id.etPassword)
         val confirmPasswordEditText = dialogView.findViewById<EditText>(R.id.etConfirmPassword)
         val beratEditText = dialogView.findViewById<EditText>(R.id.etWeight)
-        val genderDropdown = dialogView.findViewById<AutoCompleteTextView>(R.id.etGender)
+        val genderDropdown = dialogView.findViewById<AutoCompleteTextView>(R.id.etgender)
         val tinggiEditText = dialogView.findViewById<EditText>(R.id.etHeight)
 
         val genderOptions = listOf("Male", "Female", "Other")
@@ -399,17 +399,21 @@ class ProfileFragment : Fragment() {
             } else {
                 // Build AccountModel object
                 val accountModel = AccountModel(
-                    id = 0, // usually 0 or -1 for new accounts, server generates actual id
+                    id = 0,
                     email = email,
                     name = name,
-                    password = password, // send plain password, hash on server!
-                    Gender = gender,
-                    Exp = 0,
+                    password = password,
+                    gender = gender,     // ✅ lowercase
+                    exp = 0,             // ✅ lowercase
                     berat = berat.toIntOrNull() ?: 0,
                     tinggi = tinggi.toIntOrNull() ?: 0,
                     inventory = "",
-                    setting = ""
+                    setting = "",
+                    is_verify = false,
+                    created_at = "",
+                    updated_at = ""
                 )
+
 
                 // Retrofit setup
                 val retrofit = Retrofit.Builder()
@@ -529,19 +533,33 @@ class ProfileFragment : Fragment() {
                     withContext(Dispatchers.Main) {
                         if (response.isSuccessful) {
                             val body = response.body()
-                            val accountData = body?.get("account") as? Map<String, Any>
-                            if (accountData != null) {
-                                val account = mapToAccountModel(accountData)
+                            if (body != null && body.containsKey("account")) {
+                                val accountMap = body["account"] as Map<*, *>
+
+                                val account = AccountModel(
+                                    id = (accountMap["id"] as Double).toInt(),  // Retrofit converts JSON numbers to Double
+                                    email = accountMap["email"] as String,
+                                    name = accountMap["name"] as String,
+                                    password = accountMap["password"] as String,
+                                    gender = accountMap["gender"] as String,
+                                    exp = (accountMap["exp"] as Double).toInt(),
+                                    berat = (accountMap["berat"] as Double).toInt(),
+                                    tinggi = (accountMap["tinggi"] as Double).toInt(),
+                                    inventory = accountMap["inventory"] as? String,
+                                    setting = accountMap["setting"] as? String,
+                                    is_verify = accountMap["is_verify"] as Boolean,
+                                    created_at = accountMap["created_at"] as String,
+                                    updated_at = accountMap["updated_at"] as String
+                                )
+
                                 Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
-
-
                                 mainActivity?.currentAccountModel = account
                                 mainActivity?.updateUsername()
                                 mainActivity?.openFragment(ProfileFragment())
                                 mainActivity?.hideLoadingDialog()
                                 dialog.dismiss()
                             } else {
-                                Toast.makeText(context, "Login failed: Invalid account data", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Login failed: Invalid response", Toast.LENGTH_SHORT).show()
                                 mainActivity?.hideLoadingDialog()
                             }
                         } else {
@@ -578,8 +596,8 @@ class ProfileFragment : Fragment() {
             email = data["email"] as? String ?: "",
             name = data["name"] as? String ?: "",
             password = data["password"] as? String ?: "",
-            Gender = data["gender"] as? String ?: "",      // FIXED
-            Exp = (data["exp"] as? Number)?.toInt() ?: 0,  // FIXED
+            gender = data["gender"] as? String ?: "",      // FIXED
+            exp = (data["exp"] as? Number)?.toInt() ?: 0,  // FIXED
             berat = (data["berat"] as? Number)?.toInt() ?: 0,
             tinggi = (data["tinggi"] as? Number)?.toInt() ?: 0,
             inventory = data["inventory"] as? String,
@@ -612,8 +630,8 @@ class ProfileFragment : Fragment() {
             email = this.email,
             name = this.name,
             password = this.password,
-            Gender = this.Gender,
-            Exp = this.Exp,
+            gender = this.gender,
+            exp = this.exp,
             berat = this.berat,
             tinggi = this.tinggi,
             inventory = this.inventory,
@@ -681,7 +699,7 @@ class ProfileFragment : Fragment() {
         logout.visibility= View.VISIBLE
         name.setText(accountModel?.name)
         edit.text = "edit"
-        xp.setText(accountModel?.Exp.toString() + " XP")
+        xp.setText(accountModel?.exp.toString() + " XP")
         weightuser.setText(accountModel?.berat.toString() + " KG")
         username.setText(accountModel?.name)
         heightuser.setText(accountModel?.tinggi.toString() + " CM")
@@ -736,7 +754,7 @@ class ProfileFragment : Fragment() {
         }
 
         userViewModel.exp.observe(viewLifecycleOwner) { exp ->
-            binding.tvExp.text = "EXP: $exp"
+            binding.tvexp.text = "exp: $exp"
         }
     }
 

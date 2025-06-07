@@ -11,11 +11,11 @@ object XpRepository {
         this.dao = dao
     }
 
-    suspend fun insertOrUpdateXp(accountId: Int, date: String, category: String, xpGained: Int) {
+    suspend fun insertOrUpdatexp(accountId: Int, date: String, category: String, xpGained: Int) {
         val existing = dao.getXpHistoryByDateAndCategory(date, accountId, category)
         if (existing != null) {
             val updated = existing.copy(xpGained = existing.xpGained + xpGained)
-            dao.updateXpHistory(updated)
+            dao.updatexpHistory(updated)
         } else {
             val newEntry = XpHistoryEntity(
                 accountId = accountId,

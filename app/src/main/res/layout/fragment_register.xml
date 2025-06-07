@@ -60,7 +60,7 @@
 
         <View android:layout_height="12dp" android:layout_width="match_parent" />
 
-        <!-- Gender -->
+        <!-- gender -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
@@ -72,11 +72,11 @@
             app:boxCornerRadiusBottomEnd="12dp"
             app:boxBackgroundColor="#1AFFFFFF">
             <AutoCompleteTextView
-                android:id="@+id/etGender"
+                android:id="@+id/etgender"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:paddingStart="16dp"
-                android:hint="Gender"
+                android:hint="gender"
                 android:textColor="#FFFFFF"
                 android:textColorHint="#AAAAAA"
                 android:inputType="none" />

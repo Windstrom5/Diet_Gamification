@@ -169,7 +169,7 @@ class CameraFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    @androidx.annotation.OptIn(ExperimentalGetImage::class)
+    @androidx.annotation.OptIn(experimentalGetImage::class)
     private fun processImage(imageProxy: ImageProxy) {
         val mediaImage = imageProxy.image
         if (mediaImage != null) {

@@ -23,6 +23,6 @@ interface XpHistoryDao {
     suspend fun insertXpHistory(xpHistory: XpHistoryEntity)
 
     @Update
-    suspend fun updateXpHistory(xpHistory: XpHistoryEntity)
+    suspend fun updatexpHistory(xpHistory: XpHistoryEntity)
 }
 

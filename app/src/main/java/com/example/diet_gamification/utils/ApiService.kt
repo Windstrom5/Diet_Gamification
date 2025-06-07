@@ -62,19 +62,19 @@
         suspend fun getXpHistory(): Response<List<Map<String, Any>>>
 
         @POST("/api/xp-history")
-        suspend fun createXpEntry(@Body request: Map<String, Any>): Response<Map<String, Any>>
+        suspend fun createxpEntry(@Body request: Map<String, Any>): Response<Map<String, Any>>
 
         @GET("/api/xp-history/{id}")
         suspend fun getXpEntryById(@Path("id") id: Int): Response<Map<String, Any>>
 
         @PUT("/api/xp-history/{id}")
-        suspend fun updateXpEntry(
+        suspend fun updatexpEntry(
             @Path("id") id: Int,
             @Body update: Map<String, Any>
         ): Response<Map<String, Any>>
 
         @DELETE("/api/xp-history/{id}")
-        suspend fun deleteXpEntry(@Path("id") id: Int): Response<Map<String, Any>>
+        suspend fun deletexpEntry(@Path("id") id: Int): Response<Map<String, Any>>
 
 
         // ----------- WORKOUTS -----------

@@ -13,7 +13,7 @@ class XpHistoryFirebaseRepository {
         xpCollection.document(docId).set(xp)
     }
 
-    fun updateXpHistory(xp: XpHistoryEntity) {
+    fun updatexpHistory(xp: XpHistoryEntity) {
         val docId = "${xp.accountId}_${xp.date}_${xp.category}"
         xpCollection.document(docId).set(xp)
     }

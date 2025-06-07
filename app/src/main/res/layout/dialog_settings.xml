@@ -81,10 +81,10 @@
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxBackgroundColor="#1AFFFFFF">
                 <AutoCompleteTextView
-                    android:id="@+id/etGender"
+                    android:id="@+id/etgender"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:hint="Gender"
+                    android:hint="gender"
                     android:paddingStart="16dp"
                     android:textColor="#FFFFFF"
                     android:textColorHint="#AAAAAA"

@@ -55,7 +55,7 @@
                         android:textColor="@color/black"
                         android:textStyle="bold"/>
                     <TextView
-                        android:id="@+id/tvExp"
+                        android:id="@+id/tvexp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="20 Xp"
@@ -159,7 +159,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:textSize="15sp"
-                                    android:text="Gender"
+                                    android:text="gender"
                                     android:gravity="start"/>
 
                                 <TextView

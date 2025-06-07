@@ -30,7 +30,7 @@ import com.example.diet_gamification.model.AccountModel
 import com.example.diet_gamification.profile.UserViewModel
 import com.example.diet_gamification.report.ReportFragment
 import com.example.diet_gamification.todolist.ToDoListFragment
-import com.example.diet_gamification.utils.DailyCalorieXpWorker
+import com.example.diet_gamification.utils.DailyCaloriexpWorker
 import com.example.diet_gamification.utils.NotificationUtils
 import com.example.diet_gamification.workout.WorkoutFragment
 import com.example.diet_gamifikasi.profile.ProfileFragment
@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         bottomNavigation = findViewById(R.id.bottomNavigation)
 
         // Set daily calorie XP worker
-        scheduleDailyCalorieXpWorker(this)
+        scheduleDailyCaloriexpWorker(this)
 
         // Set reminders
         setDailyReminders()
@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         userViewModel.exp.observe(this, Observer { exp ->
-            findViewById<TextView>(R.id.tvExp).text = "EXP: $exp"
+            findViewById<TextView>(R.id.tvexp).text = "exp: $exp"
         })
     }
 
@@ -211,7 +211,7 @@ class MainActivity : AppCompatActivity() {
     }
     fun updateUsername() {
         findViewById<TextView>(R.id.tvUsername).text = currentAccountModel?.name ?: "Guest"
-        findViewById<TextView>(R.id.tvExp).text = "EXP: ${currentAccountModel?.Exp ?: 0}"
+        findViewById<TextView>(R.id.tvexp).text = "exp: ${currentAccountModel?.exp ?: 0}"
         val rootView = findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
         bottomNavigation.menu.findItem(R.id.nav_report).icon = ContextCompat.getDrawable(this, R.drawable.baseline_assignment_24)
         applyFontIfAvailable(this, currentAccountModel?.setting, rootView)
@@ -271,8 +271,8 @@ class MainActivity : AppCompatActivity() {
         return LayerDrawable(layers)
     }
 
-    fun scheduleDailyCalorieXpWorker(context: Context) {
-        val workRequest = PeriodicWorkRequestBuilder<DailyCalorieXpWorker>(1, TimeUnit.DAYS)
+    fun scheduleDailyCaloriexpWorker(context: Context) {
+        val workRequest = PeriodicWorkRequestBuilder<DailyCaloriexpWorker>(1, TimeUnit.DAYS)
             .setInitialDelay(calculateInitialDelay(), TimeUnit.MILLISECONDS) // Delay until midnight if needed
             .build()
 

@@ -61,7 +61,7 @@ object ShopRepository {
             Log.d("ShopRepo", "CAL-5 buff: +20% XP multiplier on goal met")
         }
 
-        return Buff(additiveXp = additive, multiplier = multiplier)
+        return Buff(additivexp = additive, multiplier = multiplier)
     }
 
     fun getWorkoutBuff(inventory: String?, weight: Double, height: Double): Buff {
@@ -92,7 +92,7 @@ object ShopRepository {
             Log.d("ShopRepo", "TW-3 buff: +10% XP multiplier")
         }
 
-        return Buff(additiveXp = additive, multiplier = multiplier)
+        return Buff(additivexp = additive, multiplier = multiplier)
     }
 }
 

@@ -16,7 +16,7 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 
-class DailyCalorieXpWorker(
+class DailyCaloriexpWorker(
     private val context: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
@@ -35,7 +35,7 @@ class DailyCalorieXpWorker(
         val today = LocalDate.now().minusDays(1).toString() // Previous day
         val totalCalories = foodItemDao.getTotalCaloriesForDateAndAccount(today, accountId) ?: 0
 
-        val xpEarned = calculateXpFromCalories(totalCalories, calorieTarget)
+        val xpEarned = calculatexpFromCalories(totalCalories, calorieTarget)
 
         // Insert XP if not already done
         val existing = xpHistoryDao.getXpHistoryByDateAndCategory(today, accountId, "calories")
@@ -52,7 +52,7 @@ class DailyCalorieXpWorker(
         return Result.success()
     }
 
-    private fun calculateXpFromCalories(actual: Int, target: Int): Int {
+    private fun calculatexpFromCalories(actual: Int, target: Int): Int {
         return when {
             actual >= target -> 50
             actual >= target * 0.75 -> 30
