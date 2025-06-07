@@ -58,6 +58,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.security.MessageDigest
 
 class ProfileFragment : Fragment() {
+
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navView: NavigationView
     private var _binding: FragmentProfileBinding? = null
@@ -74,7 +75,11 @@ class ProfileFragment : Fragment() {
     private lateinit var username: TextView
     private lateinit var weightuser: TextView
     private lateinit var heightuser: TextView
-    val mainActivity = context as? MainActivity
+    private var mainActivity: MainActivity? = null
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mainActivity = activity as? MainActivity
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -92,7 +97,6 @@ class ProfileFragment : Fragment() {
         username = binding.nameuser
         weightuser = binding.beratuser
         heightuser = binding.tinggiuser
-        getAccountFromActivity()
 //       getAccountFromBundle()  Nanti Aktifin klo udah bisa login pake firebase
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
         setupDrawerNavigation()
@@ -110,6 +114,11 @@ class ProfileFragment : Fragment() {
         }
         return binding.root
     }
+    override fun onResume() {
+        super.onResume()
+        getAccountFromActivity()
+    }
+
     private fun showPickImageDialog(
         context: Context,
         accountModel: AccountModel?,
@@ -553,9 +562,11 @@ class ProfileFragment : Fragment() {
                                 )
 
                                 Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                                Log.d("Login",account.toString())
                                 mainActivity?.currentAccountModel = account
+                                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
                                 mainActivity?.updateUsername()
-                                mainActivity?.openFragment(ProfileFragment())
+                                getAccountFromActivity() // Refresh account in fragment
                                 mainActivity?.hideLoadingDialog()
                                 dialog.dismiss()
                             } else {
@@ -715,19 +726,19 @@ class ProfileFragment : Fragment() {
         logout.visibility=View.GONE
         xp.visibility=View.GONE
     }
-    private fun getAccountFromActivity() {
-        val mainActivity = activity as? MainActivity
-        accountModel = mainActivity?.currentAccountModel
+        private fun getAccountFromActivity() {
+            val mainActivity = activity as? MainActivity
+            accountModel = mainActivity?.currentAccountModel
 
-        if (accountModel != null) {
-            Log.d("ProfileFragment2", "Received Account: ${accountModel!!.name}")
-            showLoggedInState()
+            if (accountModel != null) {
+                Log.d("ProfileFragment2", "Received Account: ${accountModel!!.name}")
+                showLoggedInState()
 
-        } else {
-            Log.e("ProfileFragment2", "AccountModel is null in MainActivity")
-            showLoggedOutState()
+            } else {
+                Log.e("ProfileFragment2", "AccountModel is null in MainActivity")
+                showLoggedOutState()
+            }
         }
-    }
 
 
     private fun setupDrawerNavigation() {

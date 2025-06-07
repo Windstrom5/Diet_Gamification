@@ -188,6 +188,12 @@ class MainActivity : AppCompatActivity() {
         }
         loadingDialog?.show()
     }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        currentAccountModel?.let {
+            outState.putParcelable("account", it)
+        }
+    }
     fun animateLoadingText(textView: TextView) {
         val loadingText = textView.text.toString()
         val animator = ValueAnimator.ofFloat(0f, 1f).apply {

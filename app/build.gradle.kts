@@ -104,4 +104,5 @@ dependencies {
     implementation(libs.glide.v4160)
     ksp(libs.compiler.v4160)
     implementation (libs.android.gif.drawable)
+    implementation (libs.okhttp)
 }

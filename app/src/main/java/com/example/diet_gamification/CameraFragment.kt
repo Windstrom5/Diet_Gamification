@@ -3,6 +3,7 @@ package com.example.diet_gamification
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
@@ -18,12 +19,18 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.diet_gamification.databinding.FragmentCameraBinding
-import com.example.diet_gamification.utils.FoodClassifier
-import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
+import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -33,15 +40,12 @@ class CameraFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var cameraExecutor: ExecutorService
-    private lateinit var foodList: List<FoodItem>
 
     private lateinit var foodInfoLayout: LinearLayout
     private lateinit var textFoodName: TextView
     private lateinit var textCalories: TextView
     private lateinit var btnCancel: Button
     private lateinit var btnSave: Button
-
-    data class FoodItem(val name: String, val calories: Double)
 
     companion object {
         const val CAMERA_PERMISSION_CODE = 1001
@@ -79,13 +83,7 @@ class CameraFragment : Fragment() {
             foodInfoLayout.visibility = View.GONE
         }
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            foodList = readCsvFromAssets(requireContext())
-
-            launch(Dispatchers.Main) {
-                checkCameraPermission()
-            }
-        }
+        checkCameraPermission()
     }
 
     private fun checkCameraPermission() {
@@ -103,9 +101,7 @@ class CameraFragment : Fragment() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_PERMISSION_CODE &&
@@ -116,25 +112,6 @@ class CameraFragment : Fragment() {
         } else {
             Toast.makeText(requireContext(), "Camera permission is required", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun readCsvFromAssets(context: Context): List<FoodItem> {
-        val list = mutableListOf<FoodItem>()
-        val inputStream = context.assets.open("calories.csv")
-        val reader = BufferedReader(InputStreamReader(inputStream))
-
-        reader.readLine() // skip header
-        var line: String?
-        while (reader.readLine().also { line = it } != null) {
-            val parts = line!!.split("\t") // Adjust tab or comma based on your CSV
-            if (parts.size >= 4) {
-                val name = parts[1].trim()
-                val caloriesStr = parts[3].trim()
-                val calories = caloriesStr.replace(" cal", "").toDoubleOrNull() ?: 0.0
-                list.add(FoodItem(name, calories))
-            }
-        }
-        return list
     }
 
     private fun startCamera() {
@@ -169,43 +146,53 @@ class CameraFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    @androidx.annotation.OptIn(experimentalGetImage::class)
     private fun processImage(imageProxy: ImageProxy) {
-        val mediaImage = imageProxy.image
-        if (mediaImage != null) {
-            val bitmap = binding.previewView.bitmap ?: run {
-                imageProxy.close()
-                return
-            }
+        val bitmap = binding.previewView.bitmap ?: run {
+            imageProxy.close()
+            return
+        }
 
-            val classifier = FoodClassifier(requireContext())
+        imageProxy.close() // Close immediately to avoid blocking
 
-            val results = classifier.classify(bitmap)
+        lifecycleScope.launch(Dispatchers.IO) {
+            sendBitmapToServer(bitmap)
+        }
+    }
 
-            results?.let { classifications ->
-                if (classifications.isNotEmpty()) {
-                    val topClasses = classifications[0].categories
-                    val detectedWords = topClasses.map { it.label.lowercase() }
-                    Log.d("TFLITE_RESULTS", "Detected: ${detectedWords.joinToString()}")
+    private suspend fun sendBitmapToServer(bitmap: Bitmap) {
+        try {
+            // Convert bitmap to JPEG bytes
+            val stream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+            val byteArray = stream.toByteArray()
 
-                    val match = foodList.firstOrNull { item ->
-                        detectedWords.any { label ->
-                            item.name.lowercase().contains(label) || label.contains(item.name.lowercase())
-                        }
-                    }
+            val requestBody = byteArray.toRequestBody("image/jpeg".toMediaTypeOrNull())
+            val multipartBody = MultipartBody.Part.createFormData("image", "image.jpg", requestBody)
 
-                    if (match != null) {
-                        Log.d("FOOD_MATCH", "${match.name} - ${match.calories} kcal")
-                        showDetectedFood(match.name, match.calories)
-                    } else {
-                        Log.d("NO_MATCH", "Detected: ${detectedWords.joinToString()}, not found in CSV")
-                    }
+            val retrofit = Retrofit.Builder()
+                .baseUrl("https://selected-jaguar-presently.ngrok-free.app") // Your Laravel backend URL
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+            val api = retrofit.create(ApiService::class.java)
+            val response = api.uploadImageForCalories(multipartBody)
+
+            withContext(Dispatchers.Main) {
+                if (response.isSuccessful) {
+                    val result = response.body()
+                    val food = result?.get("food") as? String ?: "Unknown"
+                    val calories = (result?.get("calories") as? Double) ?: 0.0
+                    showDetectedFood(food, calories)
+                } else {
+                    Toast.makeText(requireContext(), "Prediction failed", Toast.LENGTH_SHORT).show()
+                    Log.e("CameraFragment", "Error response: ${response.errorBody()?.string()}")
                 }
             }
-
-            imageProxy.close()
-        } else {
-            imageProxy.close()
+        } catch (e: Exception) {
+            Log.e("CameraFragment", "Upload error", e)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(requireContext(), "Error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -219,12 +206,20 @@ class CameraFragment : Fragment() {
 
     private fun saveFoodToTodoList(name: String, calories: Double) {
         Toast.makeText(requireContext(), "Saved: $name ($calories cal)", Toast.LENGTH_SHORT).show()
-        // You can later send this to ViewModel or another Fragment
+        // TODO: Save or pass data to ViewModel or other fragment
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
         cameraExecutor.shutdown()
+    }
+
+    interface ApiService {
+        @Multipart
+        @POST("/api/calories/check")
+        suspend fun uploadImageForCalories(
+            @Part image: MultipartBody.Part
+        ): retrofit2.Response<Map<String, Any>>
     }
 }

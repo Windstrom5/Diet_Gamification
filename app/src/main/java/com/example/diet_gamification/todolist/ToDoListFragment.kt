@@ -91,7 +91,7 @@ class ToDoListFragment : Fragment() {
         circularProgress = view.findViewById(R.id.circular_calorie_progress)
         progressText = view.findViewById(R.id.progress_text)
         calorieSuggestion = view.findViewById(R.id.calorie_suggestion)
-//        camerabutton = view.findViewById(R.id.button_scan_food)
+        camerabutton = view.findViewById(R.id.button_scan_food)
         return view
     }
 
@@ -162,9 +162,9 @@ class ToDoListFragment : Fragment() {
         }
 
         targetCalories = sharedPrefsManager.getCalorieTarget()
-//        camerabutton.setOnClickListener {
-//            openCamera()
-//        }
+        camerabutton.setOnClickListener {
+            openCamera()
+        }
     }
 
     private fun calculatexpForCalories(calories: Int): Int {
