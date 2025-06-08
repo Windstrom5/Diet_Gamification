@@ -5,7 +5,7 @@
     android:padding="24dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/dialog_rounded_bg"
+    android:background="#D3D3D3"
     android:gravity="center_horizontal">
 
     <!-- Optional fun GIF -->
