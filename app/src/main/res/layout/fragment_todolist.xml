@@ -198,15 +198,18 @@
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:paddingTop="16dp" />
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_scan_food"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:backgroundTint="?attr/colorSecondary"
+                app:backgroundTint="@color/design_default_color_secondary"
                 android:text="Scan Food (Beta)"
                 android:layout_gravity="center"
-                android:textColor="@android:color/white"
+                app:icon="@drawable/baseline_camera_alt_24"
+                app:iconTint="@color/black"
+                app:iconGravity="textStart"
+                android:textColor="@android:color/black"
                 app:layout_constraintTop_toBottomOf="@id/button_set_target"
                 app:layout_constraintStart_toStartOf="parent" />
 

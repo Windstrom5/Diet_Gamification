@@ -199,7 +199,7 @@ class ProfileFragment : Fragment() {
                     .show()
             } else {
                 val retrofit = Retrofit.Builder()
-                    .baseUrl("https://selected-jaguar-presently.ngrok-free.app") // Replace with actual base URL
+                    .baseUrl("http://192.168.1.4:8000") // Replace with actual base URL
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
 
@@ -238,7 +238,6 @@ class ProfileFragment : Fragment() {
                                 accountModel?.exp = (updated?.get("exp") as? Double)?.toInt() ?: newXp
                                 accountModel?.inventory = updated?.get("inventory") as? String ?: newInventory
 
-                                val mainActivity = activity as? MainActivity
                                 mainActivity?.currentAccountModel = accountModel
                                 mainActivity?.updateUsername()
                                 mainActivity?.hideLoadingDialog()
@@ -426,7 +425,7 @@ class ProfileFragment : Fragment() {
 
                 // Retrofit setup
                 val retrofit = Retrofit.Builder()
-                    .baseUrl("https://selected-jaguar-presently.ngrok-free.app")
+                    .baseUrl("http://192.168.1.4:8000")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
 
@@ -514,7 +513,7 @@ class ProfileFragment : Fragment() {
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://selected-jaguar-presently.ngrok-free.app")
+            .baseUrl("http://192.168.1.4:8000")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -566,6 +565,7 @@ class ProfileFragment : Fragment() {
                                 mainActivity?.currentAccountModel = account
                                 Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
                                 mainActivity?.updateUsername()
+                                mainActivity?.saveAccountToPreferences(account)
                                 getAccountFromActivity() // Refresh account in fragment
                                 mainActivity?.hideLoadingDialog()
                                 dialog.dismiss()

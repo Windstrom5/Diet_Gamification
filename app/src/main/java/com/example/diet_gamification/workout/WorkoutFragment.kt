@@ -206,7 +206,7 @@ class WorkoutFragment : Fragment() {
     private fun updatexpToLaravel(xp: Int) {
         val account = accountModel ?: return
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://selected-jaguar-presently.ngrok-free.app") // Replace with actual base URL
+            .baseUrl("http://192.168.1.4:8000") // Replace with actual base URL
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 

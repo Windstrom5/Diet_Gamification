@@ -10,6 +10,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- Capture Button (center-bottom) -->
+    <Button
+        android:id="@+id/btnCapture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Capture"
+        android:layout_gravity="center|bottom"
+        android:backgroundTint="#6200EE"
+        android:textColor="#FFFFFF" />
+
     <!-- Overlay for Food Information -->
     <LinearLayout
         android:id="@+id/foodInfoLayout"
@@ -19,7 +29,7 @@
         android:orientation="vertical"
         android:padding="16dp"
         android:background="#CCFFFFFF"
-        android:visibility="gone"> <!-- Hide initially -->
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/textFoodName"
@@ -59,5 +69,4 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
     </LinearLayout>
-
 </FrameLayout>

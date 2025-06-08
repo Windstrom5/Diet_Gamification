@@ -15,6 +15,7 @@ converterGson = "2.9.0"
 drawerbehavior = "1.0.13"
 easyandroidloading = "1.0.1"
 firebaseBom = "33.13.0"
+fitButton = "2.0.0"
 glide = "5.0.0"
 glideVersion = "4.16.0"
 guava = "32.1.3-android"
@@ -89,6 +90,7 @@ drawerbehavior = { module = "com.shiburagi.drawerbehavior:drawerbehavior", versi
 easyandroidloading = { module = "com.github.Gkemon:EasyAndroidLoading", version.ref = "easyandroidloading" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+fit-button = { module = "io.github.nikartm:fit-button", version.ref = "fitButton" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 glide-v4160 = { module = "com.github.bumptech.glide:glide", version.ref = "glideVersion" }
 google-firebase-firestore = { module = "com.google.firebase:firebase-firestore" }

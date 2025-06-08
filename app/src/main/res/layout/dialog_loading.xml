@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:background="@drawable/rounded_corner_background"
-    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#B3000000"
     android:gravity="center"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:orientation="vertical"
+    android:translationZ="10dp">
 
     <pl.droidsonroids.gif.GifImageView
-        android:id="@+id/gifLoader"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/paw"
-        android:scaleType="centerInside" />
+        android:layout_width="211dp"
+        android:layout_height="197dp"
+        android:src="@drawable/paw" />
 
     <TextView
-        android:id="@+id/loadingText"
-        android:layout_marginTop="16dp"
-        android:text="Loading"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
+        android:id="@+id/tv_loading"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:text="Loading..."/>
 
 </LinearLayout>

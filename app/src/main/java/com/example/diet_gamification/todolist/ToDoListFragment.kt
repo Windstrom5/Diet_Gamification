@@ -29,6 +29,8 @@ import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.example.diet_gamification.CameraFragment
 import com.example.diet_gamification.model.AccountModel
 import com.example.diet_gamification.room.XpHistoryDao
 import com.example.diet_gamification.room.XpHistoryEntity
@@ -202,37 +204,14 @@ class ToDoListFragment : Fragment() {
         return xpEarned
     }
 
-    // Override the onActivityResult method to capture the image and classify it
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CAMERA_REQUEST_CODE && resultCode == AppCompatActivity.RESULT_OK) {
-            // Get the captured image as a bitmap
-            val imageBitmap = data?.extras?.get("data") as Bitmap
-
-            // Use FoodClassifier to classify the image and get food name and calories
-            val classifier = FoodClassifier(requireContext()) // Ensure you have access to FoodClassifier
-            val results = classifier.classify(imageBitmap)
-
-            // Handle the classification results
-            results?.let { classifications ->
-                if (classifications.isNotEmpty()) {
-                    // Assuming you are interested in the top classification
-                    val topResult = classifications[0].getCategories().first()
-
-                    val foodName = topResult.getLabel()  // Get food name (label)
-                    val foodCalories = (topResult.getScore() * 1000).toInt()  // Get confidence as an estimate for calories
-
-                    // Show the "Add to meal" dialog
-                    addScannedFood(foodName, foodCalories)
-                }
-            }
-        }
-    }
-
     private fun openCamera() {
-        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE)
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, CameraFragment())
+            .addToBackStack(null)
+            .commit()
     }
+
+
     private fun checkAndUpdateButtonVisibility() {
         // Check if the selected date is today
         val selectedDate = currentSelectedDate?.let {
@@ -325,7 +304,7 @@ class ToDoListFragment : Fragment() {
     private fun updatexpToLaravel(xp: Int) {
         val account = accountModel ?: return
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://selected-jaguar-presently.ngrok-free.app") // Replace with actual base URL
+            .baseUrl("http://192.168.1.4:8000") // Replace with actual base URL
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 

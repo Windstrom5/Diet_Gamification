@@ -38,9 +38,14 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.WindowManager
 import androidx.core.content.ContentProviderCompat.requireContext
+import com.google.gson.Gson
+import androidx.core.graphics.drawable.toDrawable
 
 class MainActivity : AppCompatActivity() {
     private val userViewModel: UserViewModel by viewModels()
@@ -48,6 +53,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bottomNavigation: BottomNavigationView
     private var loadingDialog: AlertDialog? = null
     private var loadingAnimator: ValueAnimator? = null
+    private val prefsName = "user_prefs"
+    private val accountKey = "account_model"
+    private lateinit var loadingOverlay: View
+
     // Create ActivityResultLauncher to request exact alarm permission
     private val requestExactAlarmPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -72,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         // Request permissions
         requestExactAlarmPermission()
         requestNotificationPermission()
+        loadingOverlay = findViewById(R.id.layout_loading)
 
         bottomNavigation = findViewById(R.id.bottomNavigation)
 
@@ -80,13 +90,14 @@ class MainActivity : AppCompatActivity() {
 
         // Set reminders
         setDailyReminders()
-
+        currentAccountModel = loadAccountFromPreferences()
         if (currentAccountModel == null) {
             val lockedIcon = getLockedIcon(R.drawable.baseline_assignment_24, R.drawable.ic_lock)
             bottomNavigation.menu.findItem(R.id.nav_report).icon = lockedIcon
         } else {
             // User is logged in — show normal report icon
             bottomNavigation.menu.findItem(R.id.nav_report).icon = ContextCompat.getDrawable(this, R.drawable.baseline_assignment_24)
+            updateUsername()
         }
 
         bottomNavigation.setOnItemSelectedListener { item ->
@@ -163,37 +174,46 @@ class MainActivity : AppCompatActivity() {
         }
     }
     fun showLoadingDialog() {
-        if (loadingDialog == null) {
-            val dialogView = LayoutInflater.from(this@MainActivity).inflate(R.layout.dialog_loading, null)
-            val loadingText = dialogView.findViewById<TextView>(R.id.loadingText)
-
-            loadingDialog = AlertDialog.Builder(this@MainActivity)
-                .setView(dialogView)
-                .setCancelable(false)
-                .create()
-
-            // Start wave animation on loading text
-            loadingAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-                duration = 1200
-                repeatCount = ValueAnimator.INFINITE
-                repeatMode = ValueAnimator.RESTART
-
-                addUpdateListener { animation ->
-                    val progress = animation.animatedFraction
-                    val alpha = 0.3f + 0.7f * kotlin.math.abs(kotlin.math.sin(progress * Math.PI * 2)).toFloat()
-                    loadingText.alpha = alpha
-                }
-                start()
-            }
-        }
-        loadingDialog?.show()
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        )
+        loadingOverlay.visibility = View.VISIBLE
     }
+
+
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         currentAccountModel?.let {
             outState.putParcelable("account", it)
         }
     }
+
+    fun saveAccountToPreferences(account: AccountModel?) {
+        val sharedPref = getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            if (account == null) {
+                remove(accountKey)
+            } else {
+                val json = Gson().toJson(account)
+                putString(accountKey, json)
+            }
+            apply()
+        }
+    }
+
+    // Call this to load AccountModel from SharedPreferences
+    fun loadAccountFromPreferences(): AccountModel? {
+        val sharedPref = getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+        val json = sharedPref.getString(accountKey, null) ?: return null
+        return try {
+            Gson().fromJson(json, AccountModel::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     fun animateLoadingText(textView: TextView) {
         val loadingText = textView.text.toString()
         val animator = ValueAnimator.ofFloat(0f, 1f).apply {
@@ -212,8 +232,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun hideLoadingDialog() {
-        loadingAnimator?.cancel()
-        loadingDialog?.dismiss()
+        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        loadingOverlay.visibility = View.GONE
     }
     fun updateUsername() {
         findViewById<TextView>(R.id.tvUsername).text = currentAccountModel?.name ?: "Guest"

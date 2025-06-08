@@ -1,12 +1,15 @@
     package com.example.diet_gamification.utils
 
     import com.example.diet_gamification.model.AccountModel
+    import okhttp3.MultipartBody
     import retrofit2.Response
     import retrofit2.http.Body
     import retrofit2.http.DELETE
     import retrofit2.http.GET
+    import retrofit2.http.Multipart
     import retrofit2.http.POST
     import retrofit2.http.PUT
+    import retrofit2.http.Part
     import retrofit2.http.Path
     import retrofit2.http.Query
 
@@ -54,8 +57,12 @@
         @DELETE("/api/calories/{id}")
         suspend fun deleteCalorie(@Path("id") id: Int): Response<Map<String, Any>>
 
+        @Multipart
         @POST("/api/calories/check")
-        suspend fun checkCalories(@Body input: Map<String, Any>): Response<Map<String, Any>>
+        suspend fun checkCalories(
+            @Part image: MultipartBody.Part
+        ): Response<@JvmSuppressWildcards Any>
+
 
         // ----------- XP HISTORY (Laravel CRUD) -----------
         @GET("/api/xp-history")
